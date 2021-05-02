@@ -1,16 +1,16 @@
 import './index.css';
-import ShowMines from './showMInes'
+import ShowMines from './showMines'
 
 type Props = {
     height: number,
     width: number,
-    mines: number
+    minesCount: number
 }
 
 const Board = (props: Props) => {
     return (
         <div className="board-container">
-            {ShowMines(props.height, props.width, props.mines)}
+            <ShowMines data={props} />
         </div>
     )
 }

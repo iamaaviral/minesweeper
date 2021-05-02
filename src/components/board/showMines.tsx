@@ -2,20 +2,31 @@ import React from 'react'
 import { shuffle } from '../../utils/ShuffleBoard'
 import { calcNeighbourCount } from '../../utils/NeighbourCount'
 import { floodfill } from '../../utils/FloodFill'
+import bomb from '../../assets/bomb.svg'
+import red_flag from '../../assets/red-flag.svg'
+import green_flag from '../../assets/green-flag.svg'
 
+type Props = {
+    data: {
+        height: number,
+        width: number,
+        minesCount: number
+    }
+}
 
-const ShowMines = (height: number, width: number, minesCount: number) => {
+const ShowMines = (prop: Props) => {
+    const { height, width, minesCount } = prop.data;
 
     const [markStatus, setMarkStatus] = React.useState<Array<number>>([])
     const [openStatus, setOpenStatus] = React.useState<Array<number>>([])
     const [neighbourMineCount, setNeighbourMineCount] = React.useState<Array<number>>([])
     const [mines, setMines] = React.useState<Array<number>>([])
-    const [gameOver, setGameOver] = React.useState<boolean>(false) 
+    const [gameOver, setGameOver] = React.useState<boolean>(false)
     const [selectedMineCount, setselectedMineCount] = React.useState<number>(0)
 
 
     const handleClickLeft = (x: number, y: number): void => {
-        if(gameOver){
+        if (gameOver) {
             return;
         }
         const index = x * width + y;
@@ -38,8 +49,28 @@ const ShowMines = (height: number, width: number, minesCount: number) => {
         }
 
         const newOpenStatus = openStatus.slice(0);
-        floodfill(x, y, openStatus, width, height, neighbourMineCount);
+        floodfill(x, y, newOpenStatus, width, height, neighbourMineCount);
         setOpenStatus(newOpenStatus)
+    }
+
+    const handleClickRight = (x: number, y: number) => {
+        if (gameOver) {
+            return;
+        }
+        const index = x * width + y;
+        if (openStatus[index] === 1) {
+            return;
+        }
+        const newmarkStatus = markStatus.slice(0);
+        newmarkStatus[index] = (newmarkStatus[index] + 1) % 3;
+        let newselectedMineCount = selectedMineCount;
+        if (newmarkStatus[index] === 2) {
+            newselectedMineCount--;
+        } else if (newmarkStatus[index] === 1) {
+            newselectedMineCount++;
+        }
+        setMarkStatus(newmarkStatus);
+        setselectedMineCount(newselectedMineCount)
     }
 
     React.useEffect(() => {
@@ -56,7 +87,10 @@ const ShowMines = (height: number, width: number, minesCount: number) => {
         setMines(mines)
         setGameOver(false)
         setselectedMineCount(0)
+    }, [height, width, minesCount])
 
+    React.useEffect(() => {
+        if(selectedMineCount  === minesCount) {
             const match = mines.every((isMine, index) => {
                 if ((isMine && markStatus[index] === 1) || (!isMine && markStatus[index] !== 1)) {
                     return true;
@@ -66,7 +100,8 @@ const ShowMines = (height: number, width: number, minesCount: number) => {
             if (match) {
                 setGameOver(true)
             }
-    }, [height, width, minesCount, selectedMineCount])
+        }
+    },[selectedMineCount])
 
     const minesArray = [];
     for (let i = 0; i < height; i++) {
@@ -75,25 +110,24 @@ const ShowMines = (height: number, width: number, minesCount: number) => {
             const index = i * width + j;
             let icon = null;
             if (markStatus[index] === 1) {
-                
+
                 icon = (
-                    <span className="iconfont">{index}</span>
+                    <span className="each-cell" id="mark-1" style={{ color: 'red' }}><img src={red_flag} /></span>
                 );
             } else if (markStatus[index] === 2) {
-                
+
                 icon = (
-                    <span className="iconfont">{index}</span>
+                    <span className="each-cell" id="mark-2" style={{ color: 'green' }}><img src={green_flag} /></span>
                 );
             } else if (openStatus[index] === 1) {
-                
+
                 if (mines[index]) {
                     icon = (
-                        <span className="iconfont">m</span>
+                        <span className="each-cell" id="mine-1"><img src={bomb} /></span>
                     );
                 } else if (neighbourMineCount[index] > 0) {
-                    
                     icon = (
-                        <span>
+                        <span id="no-mine-1">
                             {neighbourMineCount[index]}
                         </span>
                     );
@@ -104,7 +138,7 @@ const ShowMines = (height: number, width: number, minesCount: number) => {
                     className={`mine-sweeper-item ${openStatus[index] ? 'is-open' : ''}`}
                     key={j}
                     onClick={() => handleClickLeft(i, j)}
-                // onContextMenu={(e)=>this.handleClickRight(i,j)}
+                    onContextMenu={(e) => handleClickRight(i, j)}
                 >
                     {icon}
                 </div>
@@ -124,6 +158,7 @@ const ShowMines = (height: number, width: number, minesCount: number) => {
             onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
         >
             {minesArray.map((e) => { return e })}
+            {gameOver ? <div>Game over</div> : null}
         </div>
     );
 }

@@ -28,6 +28,7 @@
 
 .mine-sweeper-item.is-open {
     background-color: #dededc;
+    cursor: default;
 }
 
 .panel-container {
@@ -40,4 +41,9 @@
 .panel-data-container {
     padding-top: 15px;
     text-align: center;
+}
+
+
+.each-cell img{
+    height: 36px;
 }
