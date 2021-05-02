@@ -4,7 +4,6 @@ import { calcNeighbourCount } from '../../utils/NeighbourCount'
 import { floodfill } from '../../utils/FloodFill'
 import bomb from '../../assets/bomb.svg'
 import red_flag from '../../assets/red-flag.svg'
-import green_flag from '../../assets/green-flag.svg'
 
 type Props = {
     data: {
@@ -62,12 +61,12 @@ const ShowMines = (prop: Props) => {
             return;
         }
         const newmarkStatus = markStatus.slice(0);
-        newmarkStatus[index] = (newmarkStatus[index] + 1) % 3;
+        newmarkStatus[index] = (newmarkStatus[index] + 1) % 2;
         let newselectedMineCount = selectedMineCount;
-        if (newmarkStatus[index] === 2) {
-            newselectedMineCount--;
-        } else if (newmarkStatus[index] === 1) {
+        if (newmarkStatus[index]) {
             newselectedMineCount++;
+        } else {
+            newselectedMineCount--;
         }
         setMarkStatus(newmarkStatus);
         setselectedMineCount(newselectedMineCount)
@@ -90,7 +89,7 @@ const ShowMines = (prop: Props) => {
     }, [height, width, minesCount])
 
     React.useEffect(() => {
-        if(selectedMineCount  === minesCount) {
+        if (selectedMineCount === minesCount) {
             const match = mines.every((isMine, index) => {
                 if ((isMine && markStatus[index] === 1) || (!isMine && markStatus[index] !== 1)) {
                     return true;
@@ -101,7 +100,7 @@ const ShowMines = (prop: Props) => {
                 setGameOver(true)
             }
         }
-    },[selectedMineCount])
+    }, [selectedMineCount])
 
     const minesArray = [];
     for (let i = 0; i < height; i++) {
@@ -114,12 +113,8 @@ const ShowMines = (prop: Props) => {
                 icon = (
                     <span className="each-cell" id="mark-1" style={{ color: 'red' }}><img src={red_flag} /></span>
                 );
-            } else if (markStatus[index] === 2) {
-
-                icon = (
-                    <span className="each-cell" id="mark-2" style={{ color: 'green' }}><img src={green_flag} /></span>
-                );
-            } else if (openStatus[index] === 1) {
+            }
+            else if (openStatus[index] === 1) {
 
                 if (mines[index]) {
                     icon = (
@@ -158,7 +153,20 @@ const ShowMines = (prop: Props) => {
             onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
         >
             {minesArray.map((e) => { return e })}
-            {gameOver ? <div>Game over</div> : null}
+            <div className="panel-container">
+                <div className="panel-data-container">
+                    <div>
+                        selected: {selectedMineCount}
+                    </div>
+                    <div>
+                        Total mines: {minesCount}
+                    </div>
+                </div>
+                <div className="result-container">
+                    {gameOver ? <div>Game over</div> : <div>Game in progress</div>}
+                    {gameOver ? markStatus.length === mines.length && markStatus.every((value, index) => value === mines[index]) ? <div>You won</div> : <div>You lost</div> : null}
+                </div>
+            </div>
         </div>
     );
 }

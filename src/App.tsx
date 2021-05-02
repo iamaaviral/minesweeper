@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="App">
       <div className="app-main">
-        <Board height={4} width={4} minesCount={1}/>
+        <Board height={8} width={8} minesCount={10}/>
       </div>
 
     </div>
