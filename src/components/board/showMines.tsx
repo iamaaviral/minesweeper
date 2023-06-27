@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { shuffle } from '../../utils/ShuffleBoard'
 import { calcNeighbourCount } from '../../utils/NeighbourCount'
 import { floodfill } from '../../utils/FloodFill'
@@ -22,7 +22,8 @@ const ShowMines = (prop: Props) => {
     const [mines, setMines] = React.useState<Array<number>>([])
     const [gameOver, setGameOver] = React.useState<boolean>(false)
     const [selectedMineCount, setselectedMineCount] = React.useState<number>(0)
-
+    const [_, setContextMenuVisible] = React.useState<boolean>(false);
+    const longPressTimer = useRef<any>();
 
     const handleClickLeft = (x: number, y: number): void => {
         if (gameOver) {
@@ -111,14 +112,14 @@ const ShowMines = (prop: Props) => {
             if (markStatus[index] === 1) {
 
                 icon = (
-                    <span className="each-cell" id="mark-1" style={{ color: 'red' }}><img src={red_flag} /></span>
+                    <span className="each-cell" id="mark-1" style={{ color: 'red' }}><img src={red_flag} alt="red flag"/></span>
                 );
             }
             else if (openStatus[index] === 1) {
 
                 if (mines[index]) {
                     icon = (
-                        <span className="each-cell" id="mine-1"><img src={bomb} /></span>
+                        <span className="each-cell" id="mine-1"><img src={bomb} alt='bomb'/></span>
                     );
                 } else if (neighbourMineCount[index] > 0) {
                     icon = (
@@ -128,11 +129,19 @@ const ShowMines = (prop: Props) => {
                     );
                 }
             }
+
+            const handleTouchStart = () => {
+                longPressTimer.current = setTimeout(() => {
+                  setContextMenuVisible(true);
+                }, 500);
+              };
+
             row.push(
                 <div
                     className={`mine-sweeper-item ${openStatus[index] ? 'is-open' : ''}`}
                     key={j}
                     onClick={() => handleClickLeft(i, j)}
+                    onTouchStart={handleTouchStart}
                     onContextMenu={(e) => handleClickRight(i, j)}
                 >
                     {icon}
