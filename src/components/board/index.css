@@ -25,8 +25,6 @@
 
 .mine-sweeper-item {
   /* min-width: 25px; */
-  background: url("../../assets/dry-grass.png");
-
   width: 50px;
   height: 50px;
   margin: 2px;
@@ -38,8 +36,6 @@
 }
 
 .mine-sweeper-item.is-open {
-  background: url("../../assets/grass.png");
-
   background-color: #dededc;
   cursor: default;
 }
